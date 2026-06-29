@@ -48,9 +48,9 @@
             margin-bottom: 10px;
         }
 
-        /* Botão ADMIN Escudo Oculto por Padrão */
+        /* Botão ADMIN Escudo Oculto - Inicia sumido */
         .btn-admin {
-            display: none; /* Inicia oculto e só aparece via JS se for lucaslcloux12@gmail.com */
+            display: none;
             position: fixed;
             top: 15px;
             right: 15px;
@@ -397,7 +397,7 @@
     <div id="login-screen">
         <p style="color: var(--text-muted);">Para manter seus formulários privados e salvos em tempo real, faça login com a sua conta Google.</p>
         <button class="btn-google" onclick="loginGoogle()">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22Google_Logo%22_Cloud.svg" alt="G" style="width:18px;height:18px;background:none;border:none;"> Conectar com o Google
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Percentage_22Google_LogoPercentage_22_Cloud.svg" alt="G" style="width:18px;height:18px;background:none;border:none;"> Conectar com o Google
         </button>
     </div>
 
@@ -462,21 +462,8 @@
         <div class="modal-content">
             <button class="close-modal" onclick="closeAdminModal()">&times;</button>
             
-            <div id="admin-login-box">
-                <h3 style="margin-bottom: 15px;">Autenticação do Escudo</h3>
-                <div class="form-group">
-                    <label>E-mail Corporativo</label>
-                    <input type="email" id="admin-email" placeholder="seu-email@gmail.com">
-                </div>
-                <div class="form-group">
-                    <label>Chave de Acesso</label>
-                    <input type="password" id="admin-pass" placeholder="••••••••">
-                </div>
-                <button class="btn-submit" onclick="handleAdminLogin()">Verificar Identidade</button>
-            </div>
-
-            <div id="admin-panel-box" style="display: none;">
-                <h3 style="margin-bottom: 10px;">Painel de Controle (lucaslcloux12)</h3>
+            <div id="admin-panel-box">
+                <h3 style="margin-bottom: 10px;">Painel de Controle Direto (lucaslcloux12)</h3>
                 
                 <div class="admin-subtabs">
                     <button class="admin-subtab-btn active" id="subtab-pendentes" onclick="switchAdminSubtab('pendente')">Pendentes ⏳</button>
@@ -490,8 +477,6 @@
                 <div id="admin-requests-container">
                     <p style="text-align: center; color: var(--text-muted);">Carregando requerimentos...</p>
                 </div>
-
-                <button class="btn-submit" style="background: #ef4444; color: white; margin-top: 15px;" onclick="handleAdminLogout()">Desconectar</button>
             </div>
         </div>
     </div>
@@ -522,7 +507,7 @@
                 "mathbb{I}mperad𝕠𝕣 𝕊𝕦𝕡𝕣𝕖𝕞𝕠", "mathbb{I}mperad𝕠𝕣 𝕕𝕠𝕤 mathbb{I}mperad𝕠res", "mathbb{I}mperad𝕠𝕣 𝔸𝕤𝕤𝕠𝕓𝕚𝕒𝕕𝕠𝕣", "mathbb{I}mperad𝕠𝕣 ℙ𝕝𝕦𝕤", "mathbb{I}mperad𝕠𝕣"
             ],
             "Rules_ᏟϴΝՏᎬᏞᎻϴ": [
-                "ᑭᖇᗴՏIᗪᗴᑎTᗴ ᗪO ᑕOᑎՏᗴᒪᕼO", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᗰᗴՏTᖇᗴ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᑭᒪ𝑆", "ᑕOᑎՏᗴᒪᕼᗴIᖇO"
+                "ᑭᖇᗴՏIᗪᗴᑎTᗴ ᗪO ᑕOᑎՏᗴᒪᕼO", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᗰᗴՏTᖇᗴ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᑭᒪᑌՏ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO"
             ],
             "ᎷϴΝᎪᎡ匚卂Տ": [
                 "爪ㄖ几卂尺匚卂 卂乃丂ㄥㄩㄒㄖ", "爪ㄖ几卂尺匚卂 卂丂丂ㄖ乃丨卂ᗪㄖ尺", "爪ㄖ几卂尺匚卂 爪乇丂ㄒ🇷🇪", "爪ㄖ几卂尺匚卂 ᐯ︎丨🇵", "爪ㄖ几卂尺匚卂"
@@ -537,7 +522,6 @@
         let editingForms = {}; 
         let currentUser = null;
 
-        // Gerenciador de Autenticação Google
         window.loginGoogle = function() {
             signInWithPopup(auth, googleProvider).catch(err => {
                 alert("Erro ao autenticar com o Google: " + err.message);
@@ -556,13 +540,13 @@
                 document.getElementById('protected-interface').style.display = 'block';
                 document.getElementById('logged-email').innerText = user.email;
                 
-                // O ESCUDO SÓ SURGE NA TELA CASO O E-MAIL SEJA O DO DONO Lucas
+                // Validação Realtime do Escudo: Só surge se for a conta dona do Lucas
                 if (user.email === "lucaslcloux12@gmail.com") {
                     shield.style.display = 'block';
                 } else {
                     shield.style.display = 'none';
                 }
-                
+
                 conectarBancoDados();
             } else {
                 currentUser = null;
@@ -583,7 +567,7 @@
                     searchUserForms();
                 }
 
-                if (document.getElementById('admin-panel-box').style.display === 'block') {
+                if (document.getElementById('admin-modal').style.display === 'flex') {
                     renderAdminPanel();
                 }
             });
@@ -645,7 +629,7 @@
                 grupo: grupo.replace("Rules_", ""),
                 patente: patente,
                 justificativa: justificativa,
-                status: "pendente", 
+                status: "pendente",
                 mensagemDono: "",
                 timestampDelecao: null,
                 dataEnvio: new Date().toLocaleDateString('pt-BR')
@@ -840,33 +824,16 @@
         }
 
         window.openAdminModal = function() {
-            document.getElementById('admin-modal').style.display = 'flex';
+            // Só executa a abertura se o usuário logado for de fato o dono
+            if (currentUser && currentUser.email === "lucaslcloux12@gmail.com") {
+                document.getElementById('admin-modal').style.display = 'flex';
+                switchAdminSubtab('pendente');
+            }
         }
 
         window.closeAdminModal = function() {
             document.getElementById('admin-modal').style.display = 'none';
-        }
-
-        window.handleAdminLogin = function() {
-            const email = document.getElementById('admin-email').value.trim();
-            const pass = document.getElementById('admin-pass').value;
-
-            if (email === "lucaslcloux12@gmail.com" && pass === "lu01201201") {
-                document.getElementById('admin-login-box').style.display = 'none';
-                document.getElementById('admin-panel-box').style.display = 'block';
-                switchAdminSubtab('pendente');
-            } else {
-                alert("Acesso Negado! Chave ou e-mail inválido.");
-            }
-        }
-
-        window.handleAdminLogout = function() {
-            document.getElementById('admin-login-box').style.display = 'block';
-            document.getElementById('admin-panel-box').style.display = 'none';
-            document.getElementById('admin-email').value = '';
-            document.getElementById('admin-pass').value = '';
             editingForms = {};
-            closeAdminModal();
         }
     </script>
 </body>
