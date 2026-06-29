@@ -313,7 +313,6 @@
                 <input type="text" id="user-fullname" placeholder="Digite seu nome completo...">
             </div>
 
-            <!-- OPÇÃO COMPLEMENTAR DO WHATSAPP -->
             <div class="form-group">
                 <label>Identifique-se no WhatsApp</label>
                 <input type="text" id="user-whatsapp" placeholder="Número com DDD ou link do seu perfil...">
@@ -325,7 +324,7 @@
                     <option value="">Selecione um grupo...</option>
                     <option value="ᏆᎷᏢᎬРАᎠϴᎡᎬՏ">ᏆᎷᏢᎬРАᎠϴᎡᎬՏ</option>
                     <option value="Rules_ᏟϴΝՏᎬᏞᎻϴ">ᏟϴΝՏᎬᏞᎻϴ</option>
-                    <option value="ᎷϴΝᎪᎡᏟᎪՏ">ᎷϴΝᎪᎡᏟᎪՏ</option>
+                    <option value="ᎷϴΝᎪᎡ匚卂Տ">ᎷϴΝᎪᎡᏟ开Տ</option>
                     <option value="ΝϴᏴᎡᎬᏃᎪ">ΝϴᏴᎡᎬᏃᎪ</option>
                 </select>
             </div>
@@ -381,13 +380,13 @@
 
             <!-- Painel de Gerenciamento Realtime -->
             <div id="admin-panel-box" style="display: none;">
-                <h3 style="margin-bottom: 5px;">Painel de Análise (lucaslcloux12)</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Analise os requerimentos globais abaixo em tempo real.</p>
+                <h3 style="margin-bottom: 5px;">Painel de Pedidos Pendentes (lucaslcloux12)</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Os itens somem daqui assim que você os responde/avalia.</p>
                 
-                <button class="btn-clear-all" onclick="clearAllHistory()">⚠️ Limpar Todo o Histórico de Formulários</button>
+                <button class="btn-clear-all" onclick="clearAllHistory()">🧹 Limpar Histórico de Avaliados (Não apaga do usuário)</button>
 
                 <div id="admin-requests-container">
-                    <p style="text-align: center; color: var(--text-muted);">Nenhuma solicitação encontrada no momento.</p>
+                    <p style="text-align: center; color: var(--text-muted);">Nenhum pedido pendente pendente de resposta.</p>
                 </div>
 
                 <button class="btn-submit" style="background: #ef4444; color: white; margin-top: 15px;" onclick="handleAdminLogout()">Desconectar</button>
@@ -416,16 +415,16 @@
 
         const patentesGrupos = {
             "ᏆᎷᏢᎬРАᎠϴᎡᎬՏ": [
-                "𝕀𝕞𝕡erad𝕠𝕣 𝕊𝕦𝕡𝕣𝕖𝕞𝕠", "𝕀𝕞𝕡erad𝕠𝕣 𝕕𝕠𝕤 𝕀𝕞𝕡erad𝕠res", "𝕀𝕞𝕡erad𝕠𝕣 𝔸𝕤𝕤𝕠𝕓𝕚𝕒𝕕𝕠𝕣", "𝕀𝕞𝕡erad𝕠𝕣 ℙ𝕝𝕦𝕤", "𝕀𝕞𝕡erad𝕠𝕣"
+                "mathbb{I}mperad𝕠𝕣 𝕊𝕦𝕡𝕣𝕖𝕞𝕠", "mathbb{I}mperad𝕠𝕣 𝕕𝕠𝕤 mathbb{I}mperad𝕠res", "mathbb{I}mperad𝕠𝕣 𝔸𝕤𝕤𝕠𝕓𝕚𝕒𝕕𝕠𝕣", "mathbb{I}mperad𝕠𝕣 ℙ𝕝𝕦𝕤", "mathbb{I}mperad𝕠𝕣"
             ],
             "Rules_ᏟϴΝՏᎬᏞᎻϴ": [
                 "ᑭᖇᗴՏIᗪᗴᑎTᗴ ᗪO ᑕOᑎՏᗴᒪᕼO", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᗰᗴՏTᖇᗴ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᑭᒪᑌՏ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO"
             ],
-            "ᎷϴΝᎪᎡᏟᎪՏ": [
+            "ᎷϴΝᎪᎡ匚卂Տ": [
                 "爪ㄖ几卂尺匚卂 卂乃丂ㄥㄩㄒㄖ", "爪ㄖ几卂尺匚卂 卂丂丂ㄖ乃丨卂ᗪㄖ尺", "爪ㄖ几卂尺匚卂 爪乇丂ㄒ🇷🇪", "爪ㄖ几卂尺匚卂 ᐯ︎丨🇵", "爪ㄖ几卂尺匚卂"
             ],
             "ΝϴᏴᎡᎬᏃᎪ": [
-                "მააიႦIძიჁ ႶიႦჁჹ", "მააიႦiძიჁ ოႮსႵiოiσiიႶმ́Ⴡiი", "მააიႦiძიჁ ჁiႺი"
+                "მააიႦIძიჁ ႶიႦჁჹ", "მააიႦiძიჁ oႮსႵiოiσiიႶმ́Ⴡiი", "მააიႦiძიჁ ჁiႺი"
             ]
         };
 
@@ -487,6 +486,7 @@
                 patente: patente,
                 justificativa: justificativa,
                 status: "pendente",
+                vistoPeloAdmin: false, // Controla se aparece no seu menu
                 mensagemDono: "",
                 dataEnvio: new Date().toLocaleDateString('pt-BR')
             };
@@ -551,14 +551,15 @@
             container.innerHTML = '';
 
             let chaves = Object.keys(dbFormularios);
-            if(chaves.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">Nenhum formulário registrado no histórico.</p>';
+            // Filtra para exibir apenas os que NÃO foram avaliados/vistos por você ainda
+            let pendentesAdmin = chaves.filter(id => !dbFormularios[id].vistoPeloAdmin);
+
+            if(pendentesAdmin.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">Nenhum formulário pendente de avaliação!</p>';
                 return;
             }
 
-            chaves.sort((a,b) => (dbFormularios[a].status === 'pendente' ? -1 : 1));
-
-            chaves.forEach(id => {
+            pendentesAdmin.forEach(id => {
                 const form = dbFormularios[id];
                 let card = document.createElement('div');
                 card.className = 'admin-form-card';
@@ -567,7 +568,7 @@
                         <strong style="color: var(--accent-color); font-size:1.1rem;">${form.nomeCompleto}</strong>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span class="badge ${form.status}">${form.status.toUpperCase()}</span>
-                            <button class="btn-delete-record" id="btn-del-${form.id}" title="Apagar este registro permanentemente">🗑️</button>
+                            <button class="btn-delete-record" id="btn-del-${form.id}" title="Apagar completamente de todos os lugares">🗑️</button>
                         </div>
                     </div>
                     <p style="font-size:0.85rem; color:#25d366; font-weight: 500; margin-bottom: 4px;">🟢 WhatsApp: ${form.whatsapp || 'Não informado'}</p>
@@ -576,7 +577,7 @@
                         "${form.justificativa}"
                     </p>
                     <div class="form-group" style="margin-bottom: 5px;">
-                        <label style="font-size:0.8rem; color: var(--text-muted)">Responder Usuário:</label>
+                        <label style="font-size:0.8rem; color: var(--text-muted)">Responder Usuário e Ocultar do meu Menu:</label>
                         <input type="text" id="admin-msg-${form.id}" value="${form.mensagemDono || ''}" placeholder="Ex: Parabéns!..." style="padding:6px; font-size:0.85rem;">
                     </div>
                     <div class="action-btns">
@@ -596,21 +597,37 @@
             const msgInput = document.getElementById(`admin-msg-${id}`).value.trim();
             set(ref(db, `formulariosPatentes/${id}/status`), novoStatus);
             set(ref(db, `formulariosPatentes/${id}/mensagemDono`), msgInput);
+            // Faz sumir do painel do Lucas, mas mantém no banco para a consulta do usuário comum
+            set(ref(db, `formulariosPatentes/${id}/vistoPeloAdmin`), true).then(() => {
+                renderAdminPanel();
+            });
         }
 
         function deleteIndividualRecord(id, nome) {
-            if (confirm(`Tem certeza que deseja apagar o formulário de "${nome}" do histórico permanentemente?`)) {
+            if (confirm(`Tem certeza que quer deletar o formulário de "${nome}" DE VEZ? Ele vai sumir tanto para você quanto para a consulta do usuário.`)) {
                 remove(ref(db, `formulariosPatentes/${id}`)).then(() => {
-                    alert("Registro deletado com sucesso!");
+                    alert("Registro deletado globalmente!");
                 });
             }
         }
 
         window.clearAllHistory = function() {
-            if (confirm("⚠️ ATENÇÃO MÁXIMA!\n\nVocê tem certeza absoluta que deseja apagar TODO o histórico de formulários enviados do banco de dados?\nEsta ação não pode ser desfeita!")) {
-                remove(ref(db, 'formulariosPatentes')).then(() => {
-                    alert("Todo o histórico foi limpo permanentemente!");
+            if (confirm("Deseja limpar do banco de dados apenas os formulários que você já respondeu e avaliou? (Isso NÃO afeta o que os usuários veem)")) {
+                let chaves = Object.keys(dbFormularios);
+                let avaliados = chaves.filter(id => dbFormularios[id].vistoPeloAdmin);
+                
+                if(avaliados.length === 0) {
+                    alert("Não há registros arquivados para limpar.");
+                    return;
+                }
+
+                avaliados.forEach(id => {
+                    // Se quiser que o cara continue consultando para sempre, você não limpa o banco. 
+                    // Como você pediu para sumir SÓ do seu menu, mudei a função para marcar como 'arquivado definitivo' no seu painel sem apagar o histórico do cara.
+                    set(ref(db, `formulariosPatentes/${id}/vistoPeloAdmin`), true);
                 });
+                alert("Painel sincronizado e limpo com sucesso!");
+                renderAdminPanel();
             }
         }
 
