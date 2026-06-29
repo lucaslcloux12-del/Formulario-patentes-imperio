@@ -66,6 +66,64 @@
             color: rgba(16, 185, 129, 0.5);
         }
 
+        /* Tela de Login Google Requerida */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 60px;
+            text-align: center;
+            max-width: 450px;
+        }
+
+        .btn-google {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: 0.2s;
+        }
+
+        .btn-google:hover {
+            background: #f3f4f6;
+            transform: translateY(-2px);
+        }
+
+        /* Perfil Conectado */
+        .user-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
         /* Abas de Navegação */
         .nav-tabs {
             display: flex;
@@ -186,6 +244,9 @@
         .badge.pendente { background: rgba(245, 158, 11, 0.2); color: var(--warning-color); }
         .badge.aprovado { background: rgba(16, 185, 129, 0.2); color: var(--accent-color); }
         .badge.reprovado { background: rgba(239, 68, 68, 0.2); color: var(--danger-color); }
+        .badge.arquivado_aprovado { background: rgba(16, 185, 129, 0.1); color: #74f0c4; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge.arquivado_reprovado { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge.lixeira { background: rgba(245, 158, 11, 0.1); color: #f7b23b; }
 
         /* Modal Admin */
         .modal {
@@ -222,21 +283,23 @@
         /* Sub-abas exclusivas do Painel Admin */
         .admin-subtabs {
             display: flex;
-            gap: 5px;
+            gap: 4px;
             margin-bottom: 15px;
             background: var(--bg-color);
             padding: 5px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
+            flex-wrap: wrap;
         }
 
         .admin-subtab-btn {
             flex: 1;
-            padding: 8px;
+            min-width: 90px;
+            padding: 8px 4px;
             background: transparent;
             border: none;
             color: var(--text-muted);
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
             border-radius: 4px;
@@ -263,16 +326,19 @@
             display: flex;
             gap: 10px;
             margin-top: 12px;
+            flex-wrap: wrap;
         }
 
         .btn-action {
             flex: 1;
+            min-width: 120px;
             padding: 8px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
             color: #000;
+            font-size: 0.8rem;
         }
 
         .btn-edit-evaluation {
@@ -305,6 +371,17 @@
             color: var(--accent-color);
             text-align: center;
         }
+
+        .countdown-alert {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 6px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -313,74 +390,77 @@
 
     <header>
         <h1>Requerimento de Patentes</h1>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Escolha o grupo de patente desejado e envie seu formulário</p>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Gerencie e envie seus requerimentos com segurança e privacidade</p>
     </header>
 
-    <div class="nav-tabs">
-        <button class="tab-btn active" id="tab-envio" onclick="switchTab('envio')">Enviar Formulário</button>
-        <button class="tab-btn" id="tab-status" onclick="switchTab('status')">Acompanhar Pedido</button>
+    <div id="login-screen">
+        <p style="color: var(--text-muted);">Para manter seus formulários privados e salvos em tempo real, faça login com a sua conta Google.</p>
+        <button class="btn-google" onclick="loginGoogle()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_\"Google_Logo\"_Cloud.svg" alt="G" style="width:18px;height:18px;background:none;border:none;"> Conectar com o Google
+        </button>
     </div>
 
-    <div class="main-card">
-        <!-- SEÇÃO 1: ENVIO DE FORMULÁRIO -->
-        <div id="section-envio" class="view-section active">
-            <div class="form-group">
-                <label>Nome Completo</label>
-                <input type="text" id="user-fullname" placeholder="Digite seu nome completo...">
-            </div>
-
-            <div class="form-group">
-                <label>Identifique-se no WhatsApp</label>
-                <input type="text" id="user-whatsapp" placeholder="Número com DDD ou link do seu perfil...">
-            </div>
-
-            <div class="form-group">
-                <label>Grupo de Patentes</label>
-                <select id="patent-group" onchange="updatePatentOptions()">
-                    <option value="">Selecione um grupo...</option>
-                    <option value="ᏆᎷᏢᎬРАᎠϴᎡᎬՏ">ᏆᎷᏢᎬРАᎠϴᎡᎬՏ</option>
-                    <option value="Rules_ᏟϴΝՏᎬLHϴ">ᏟϴΝՏᎬᏞᎻϴ</option>
-                    <option value="ᎷϴΝᎪᎡ匚卂Տ">ᎷϴΝᎪᎡᏟ开Տ</option>
-                    <option value="ΝϴᏴᎡᎬᏃᎪ">ΝϴᏴᎡᎬᏃᎪ</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Patente Desejada</label>
-                <select id="patent-target" disabled>
-                    <option value="">Selecione primeiro o grupo...</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Justificativa / Motivo do Pedido</label>
-                <textarea id="user-reason" rows="4" placeholder="Por que você merece essa patente?"></textarea>
-            </div>
-
-            <button class="btn-submit" onclick="submitFormulary()">Enviar Solicitação</button>
+    <div id="protected-interface" style="display: none; width: 100%; max-width: 600px;">
+        <div class="user-bar">
+            <span>Conectado como: <strong id="logged-email" style="color: var(--accent-color);">...</strong></span>
+            <button class="btn-logout" onclick="logoutGoogle()">Desconectar</button>
         </div>
 
-        <!-- SEÇÃO 2: CONSULTAR STATUS -->
-        <div id="section-status" class="view-section">
-            <div class="form-group">
-                <label>Consultar por Nome Completo</label>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="search-fullname" placeholder="Exadamente igual ao enviado...">
-                    <button class="btn-submit" style="width: auto; padding: 0 20px;" onclick="searchUserForms()">Buscar</button>
+        <div class="nav-tabs">
+            <button class="tab-btn active" id="tab-envio" onclick="switchTab('envio')">Enviar Formulário</button>
+            <button class="tab-btn" id="tab-status" onclick="switchTab('status')">Meus Pedidos Salvos</button>
+        </div>
+
+        <div class="main-card">
+            <div id="section-envio" class="view-section active">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="user-fullname" placeholder="Digite seu nome completo...">
+                </div>
+
+                <div class="form-group">
+                    <label>Identifique-se no WhatsApp</label>
+                    <input type="text" id="user-whatsapp" placeholder="Número com DDD ou link do seu perfil...">
+                </div>
+
+                <div class="form-group">
+                    <label>Grupo de Patentes</label>
+                    <select id="patent-group" onchange="updatePatentOptions()">
+                        <option value="">Selecione um grupo...</option>
+                        <option value="ᏆᎷᏢᎬРАᎠϴᎡᎬՏ">ᏆᎷᏢᎬРАᎠϴᎡᎬՏ</option>
+                        <option value="Rules_ᏟϴΝՏᎬᏞᎻϴ">ᏟϴΝՏᎬᏞᎻϴ</option>
+                        <option value="ᎷϴΝᎪᎡ匚卂Տ">ᎷϴΝᎪᎡᏟ开Տ</option>
+                        <option value="ΝϴᏴᎡᎬᏃᎪ">ΝϴᏴᎡᎬᏃᎪ</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Patente Desejada</label>
+                    <select id="patent-target" disabled>
+                        <option value="">Selecione primeiro o grupo...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Justificativa / Motivo do Pedido</label>
+                    <textarea id="user-reason" rows="4" placeholder="Por que você merece essa patente?"></textarea>
+                </div>
+
+                <button class="btn-submit" onclick="submitFormulary()">Enviar Solicitação</button>
+            </div>
+
+            <div id="section-status" class="view-section">
+                <div id="search-results">
+                    <p style="color: var(--text-muted); text-align: center; font-size: 0.9rem;">Carregando seus formulários vinculados à conta Google...</p>
                 </div>
             </div>
-            <div id="search-results">
-                <p style="color: var(--text-muted); text-align: center; font-size: 0.9rem;">Insira seu nome completo acima para verificar suas solicitações.</p>
-            </div>
         </div>
     </div>
 
-    <!-- MODAL DO DONO (ADMIN) -->
     <div class="modal" id="admin-modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeAdminModal()">&times;</button>
             
-            <!-- Login Admin -->
             <div id="admin-login-box">
                 <h3 style="margin-bottom: 15px;">Autenticação do Escudo</h3>
                 <div class="form-group">
@@ -394,15 +474,16 @@
                 <button class="btn-submit" onclick="handleAdminLogin()">Verificar Identidade</button>
             </div>
 
-            <!-- Painel de Gerenciamento Realtime -->
             <div id="admin-panel-box" style="display: none;">
                 <h3 style="margin-bottom: 10px;">Painel de Controle (lucaslcloux12)</h3>
                 
-                <!-- Sub-Abas internas do Admin para separar o fluxo -->
                 <div class="admin-subtabs">
                     <button class="admin-subtab-btn active" id="subtab-pendentes" onclick="switchAdminSubtab('pendente')">Pendentes ⏳</button>
                     <button class="admin-subtab-btn" id="subtab-aprovados" onclick="switchAdminSubtab('aprovado')">Aprovados ✅</button>
                     <button class="admin-subtab-btn" id="subtab-reprovados" onclick="switchAdminSubtab('reprovado')">Reprovados ❌</button>
+                    <button class="admin-subtab-btn" id="subtab-arq-aprovados" onclick="switchAdminSubtab('arquivado_aprovado')">Arq. Aprovados 📁</button>
+                    <button class="admin-subtab-btn" id="subtab-arq-reprovados" onclick="switchAdminSubtab('arquivado_reprovado')">Arq. Reprovados 📂</button>
+                    <button class="admin-subtab-btn" id="subtab-lixeira" onclick="switchAdminSubtab('lixeira')">Deleção (24h) 🗑️</button>
                 </div>
 
                 <div id="admin-requests-container">
@@ -414,10 +495,10 @@
         </div>
     </div>
 
-    <!-- Conectores Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, set, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAfG1gFI4SoEdttmhwORZt92_9bgqJcsgw",
@@ -432,6 +513,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
 
         const patentesGrupos = {
             "ᏆᎷᏢᎬРАᎠϴᎡᎬՏ": [
@@ -450,21 +533,67 @@
 
         let dbFormularios = {};
         let currentAdminFilter = 'pendente'; 
-        let editingForms = {}; // Rastreia quais formulários arquivados estão em modo de edição temporária
+        let editingForms = {}; 
+        let currentUser = null;
 
-        const formsRef = ref(db, 'formulariosPatentes');
-        onValue(formsRef, (snapshot) => {
-            dbFormularios = snapshot.val() || {};
-            
-            const buscaAtiva = document.getElementById('search-fullname').value.trim();
-            if(buscaAtiva && document.getElementById('section-status').classList.contains('active')) {
-                searchUserForms();
-            }
+        // Gerenciador de Autenticação Google
+        window.loginGoogle = function() {
+            signInWithPopup(auth, googleProvider).catch(err => {
+                alert("Erro ao autenticar com o Google: " + err.message);
+            });
+        };
 
-            if(document.getElementById('admin-panel-box').style.display === 'block') {
-                renderAdminPanel();
+        window.logoutGoogle = function() {
+            signOut(auth);
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('protected-interface').style.display = 'block';
+                document.getElementById('logged-email').innerText = user.email;
+                
+                // Conecta o Realtime Database após o login
+                conectarBancoDados();
+            } else {
+                currentUser = null;
+                document.getElementById('login-screen').style.display = 'block';
+                document.getElementById('protected-interface').style.display = 'none';
             }
         });
+
+        function conectarBancoDados() {
+            const formsRef = ref(db, 'formulariosPatentesv2');
+            onValue(formsRef, (snapshot) => {
+                dbFormularios = snapshot.val() || {};
+                
+                // Executa a varredura da lixeira (Deleção em 24h) de forma automática
+                verificarLixeiraExclusoes();
+
+                if (document.getElementById('protected-interface').style.display === 'block') {
+                    searchUserForms();
+                }
+
+                if (document.getElementById('admin-panel-box').style.display === 'block') {
+                    renderAdminPanel();
+                }
+            });
+        }
+
+        // Função interna para limpar dados expirados da lixeira (24 horas)
+        function verificarLixeiraExclusoes() {
+            const agora = Date.now();
+            const vinteEQuatroHorasMs = 24 * 60 * 60 * 1000;
+
+            for (let id in dbFormularios) {
+                if (dbFormularios[id].status === 'lixeira' && dbFormularios[id].timestampDelecao) {
+                    if (agora - dbFormularios[id].timestampDelecao >= vinteEQuatroHorasMs) {
+                        remove(ref(db, `formulariosPatentesv2/${id}`));
+                    }
+                }
+            }
+        }
 
         window.updatePatentOptions = function() {
             const grupo = document.getElementById('patent-group').value;
@@ -487,6 +616,7 @@
         }
 
         window.submitFormulary = function() {
+            if (!currentUser) return;
             const nome = document.getElementById('user-fullname').value.trim();
             const whatsapp = document.getElementById('user-whatsapp').value.trim();
             const grupo = document.getElementById('patent-group').value;
@@ -498,70 +628,77 @@
                 return;
             }
 
-            const novoFormRef = push(ref(db, 'formulariosPatentes'));
+            const novoFormRef = push(ref(db, 'formulariosPatentesv2'));
             const formData = {
                 id: novoFormRef.key,
+                userUid: currentUser.uid,
+                userEmail: currentUser.email,
                 nomeCompleto: nome,
-                nomePesquisa: nome.toLowerCase(),
                 whatsapp: whatsapp,
                 grupo: grupo.replace("Rules_", ""),
                 patente: patente,
                 justificativa: justificativa,
-                status: "pendente",
+                status: "pendente", // pendente, aprovado, reprovado, arquivado_aprovado, arquivado_reprovado, lixeira
                 mensagemDono: "",
+                timestampDelecao: null,
                 dataEnvio: new Date().toLocaleDateString('pt-BR')
             };
 
             set(novoFormRef, formData).then(() => {
-                alert("Formulário enviado com sucesso!");
+                alert("Formulário enviado e armazenado na sua conta Google!");
                 document.getElementById('user-fullname').value = '';
                 document.getElementById('user-whatsapp').value = '';
                 document.getElementById('patent-group').value = '';
                 document.getElementById('user-reason').value = '';
                 updatePatentOptions();
-                
-                document.getElementById('search-fullname').value = nome;
                 switchTab('status');
-                searchUserForms();
             });
         }
 
+        // Busca de formulários baseada estritamente no Login Google Ativo (Segurança Total)
         window.searchUserForms = function() {
-            const nomeBusca = document.getElementById('search-fullname').value.trim().toLowerCase();
             const resultsContainer = document.getElementById('search-results');
             resultsContainer.innerHTML = '';
 
-            if(!nomeBusca) {
-                resultsContainer.innerHTML = '<p style="color: var(--danger-color); text-align:center;">Por favor, informe seu nome para pesquisar.</p>';
-                return;
-            }
+            if (!currentUser) return;
 
             let achados = [];
             for (let id in dbFormularios) {
-                if (dbFormularios[id].nomePesquisa === nomeBusca) {
+                if (dbFormularios[id].userUid === currentUser.uid) {
                     achados.push(dbFormularios[id]);
                 }
             }
 
             if(achados.length === 0) {
-                resultsContainer.innerHTML = '<p style="color: var(--text-muted); text-align:center;">Nenhum formulário ativo encontrado para este nome.</p>';
+                resultsContainer.innerHTML = '<p style="color: var(--text-muted); text-align:center;">Nenhum formulário enviado por esta conta Google.</p>';
                 return;
             }
 
-            resultsContainer.innerHTML = `<div class="info-search-box">Encontrado(s) ${achados.length} requerimento(s) vinculados a você</div>`;
+            resultsContainer.innerHTML = `<div class="info-search-box">Sua conta possui ${achados.length} requerimento(s) gravado(s)</div>`;
 
             achados.forEach(form => {
+                let statusExibido = form.status;
+                if (statusExibido === 'arquivado_aprovado') statusExibido = 'aprovado';
+                if (statusExibido === 'arquivado_reprovado') statusExibido = 'reprovado';
+                
+                let extraAlertaLixeira = '';
+                if(form.status === 'lixeira') {
+                    statusExibido = 'Deleção programada';
+                    extraAlertaLixeira = `<span class="countdown-alert">Aviso: Este item foi movido para a lixeira pelo Administrador.</span>`;
+                }
+
                 let box = document.createElement('div');
                 box.className = 'status-box';
                 box.innerHTML = `
                     <div class="status-header">
                         <span style="font-weight:bold; color:white;">${form.patente}</span>
-                        <span class="badge ${form.status}">${form.status.toUpperCase()}</span>
+                        <span class="badge ${form.status}">${statusExibido.toUpperCase()}</span>
                     </div>
                     <p style="font-size:0.85rem; color: var(--text-muted); margin-bottom: 8px;">Grupo: ${form.grupo} • Enviado em: ${form.dataEnvio}</p>
                     <div style="font-size:0.9rem; margin-top:5px; background: rgba(0,0,0,0.1); padding:8px; border-radius:4px;">
                         <strong>Mensagem de Lucas Cloux:</strong> <span style="color: #fff; font-style: italic;">${form.mensagemDono || 'Aguardando avaliação...'}</span>
                     </div>
+                    ${extraAlertaLixeira}
                 `;
                 resultsContainer.appendChild(box);
             });
@@ -574,6 +711,9 @@
             if (filtro === 'pendente') document.getElementById('subtab-pendentes').classList.add('active');
             if (filtro === 'aprovado') document.getElementById('subtab-aprovados').classList.add('active');
             if (filtro === 'reprovado') document.getElementById('subtab-reprovados').classList.add('active');
+            if (filtro === 'arquivado_aprovado') document.getElementById('subtab-arq-aprovados').classList.add('active');
+            if (filtro === 'arquivado_reprovado') document.getElementById('subtab-arq-reprovados').classList.add('active');
+            if (filtro === 'lixeira') document.getElementById('subtab-lixeira').classList.add('active');
             
             renderAdminPanel();
         }
@@ -591,7 +731,7 @@
             let filtrados = chaves.filter(id => dbFormularios[id].status === currentAdminFilter);
 
             if(filtrados.length === 0) {
-                container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px 0;">Nenhum item nesta pasta (${currentAdminFilter.toUpperCase()}).</p>`;
+                container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px 0;">Nenhum item encontrado nesta pasta (${currentAdminFilter.toUpperCase()}).</p>`;
                 return;
             }
 
@@ -602,26 +742,37 @@
                 
                 let botoesAcaoHtml = '';
 
-                // Se for a aba pendente OU se o dono clicou para editar um arquivado
+                // Interface Dinâmica de Edição/Ações dependendo de qual aba o Admin Lucas está visualizando
                 if (currentAdminFilter === 'pendente' || editingForms[id]) {
                     botoesAcaoHtml = `
                         <div class="form-group" style="margin-bottom: 5px;">
                             <label style="font-size:0.8rem; color: var(--text-muted)">Adicionar/Alterar Mensagem de Retorno:</label>
-                            <input type="text" id="admin-msg-${form.id}" value="${form.mensagemDono || ''}" placeholder="Ex: Parabéns! Você cumpriu os requisitos..." style="padding:6px; font-size:0.85rem;">
+                            <input type="text" id="admin-msg-${form.id}" value="${form.mensagemDono || ''}" placeholder="Ex: Requisitos cumpridos..." style="padding:6px; font-size:0.85rem;">
                         </div>
                         <div class="action-btns">
-                            <button class="btn-action" style="background: var(--accent-color);" id="btn-aprove-${form.id}">Mover p/ Aprovados</button>
-                            <button class="btn-action" style="background: var(--danger-color); color: white;" id="btn-reprove-${form.id}">Mover p/ Reprovados</button>
-                            ${editingForms[id] ? `<button class="btn-action" style="background: var(--warning-color); color: black;" id="btn-back-pendente-${form.id}">Voltar p/ Pendente</button>` : ''}
+                            <button class="btn-action" style="background: var(--accent-color);" id="btn-aprove-${form.id}">Aprovar</button>
+                            <button class="btn-action" style="background: var(--danger-color); color: white;" id="btn-reprove-${form.id}">Reprovar</button>
+                            <button class="btn-action" style="background: #eab308; color: black;" id="btn-arq-aprov-${form.id}">Arq. Aprovado</button>
+                            <button class="btn-action" style="background: #f97316; color: white;" id="btn-arq-reprov-${form.id}">Arq. Reprovado</button>
+                            <button class="btn-action" style="background: #6b7280; color: white;" id="btn-trash-${form.id}">Mover p/ Lixeira</button>
                         </div>
                     `;
                 } else {
-                    // Caso esteja estático nas abas de Aprovados/Reprovados
+                    let tempoLixeiraTexto = '';
+                    if (form.status === 'lixeira' && form.timestampDelecao) {
+                        const decorrido = Date.now() - form.timestampDelecao;
+                        const restanteMinutos = Math.max(0, Math.floor(((24 * 60 * 60 * 1000) - decorrido) / (1000 * 60)));
+                        const horas = Math.floor(restanteMinutos / 60);
+                        const mins = restanteMinutos % 60;
+                        tempoLixeiraTexto = `<p class="countdown-alert" style="margin-bottom:8px;">⏱️ Deleção definitiva em: ${horas}h ${mins}m</p>`;
+                    }
+
                     botoesAcaoHtml = `
+                        ${tempoLixeiraTexto}
                         <div style="font-size:0.85rem; margin-top:8px; padding:8px; background: rgba(0,0,0,0.2); border-radius:4px; color: var(--text-muted);">
-                            <strong>Sua Resposta Enviada:</strong> <span style="color:#fff;">${form.mensagemDono || '(Sem mensagem adicional)'}</span>
+                            <strong>Sua Resposta Enviada:</strong> <span style="color:#fff;">${form.mensagemDono || '(Sem resposta)'}</span>
                         </div>
-                        <button class="btn-edit-evaluation" onclick="toggleEditMode('${form.id}')">✏️ Editar Avaliação</button>
+                        <button class="btn-edit-evaluation" onclick="toggleEditMode('${form.id}')">✏️ Editar / Mover de Pasta</button>
                     `;
                 }
 
@@ -630,6 +781,7 @@
                         <strong style="color: var(--accent-color); font-size:1.1rem;">${form.nomeCompleto}</strong>
                         <span class="badge ${form.status}">${form.status.toUpperCase()}</span>
                     </div>
+                    <p style="font-size:0.8rem; color: var(--text-muted); margin-bottom: 2px;">👤 Google Account: ${form.userEmail}</p>
                     <p style="font-size:0.85rem; color:#25d366; font-weight: 500; margin-bottom: 4px;">🟢 WhatsApp: ${form.whatsapp || 'Não informado'}</p>
                     <p style="font-size:0.85rem; color:var(--text-muted);">Solicitou: <strong>${form.patente}</strong> (${form.grupo}) em ${form.dataEnvio}</p>
                     <p style="font-size:0.9rem; background:#111; padding:10px; margin:8px 0; border-radius:4px; border-left:3px solid var(--border-color);">
@@ -639,13 +791,12 @@
                 `;
                 container.appendChild(card);
 
-                // Executa os ganchos de cliques dinâmicos
                 if (currentAdminFilter === 'pendente' || editingForms[id]) {
                     document.getElementById(`btn-aprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'aprovado');
                     document.getElementById(`btn-reprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'reprovado');
-                    if(editingForms[id]) {
-                        document.getElementById(`btn-back-pendente-${form.id}`).onclick = () => updateFormStatus(form.id, 'pendente');
-                    }
+                    document.getElementById(`btn-arq-aprov-${form.id}`).onclick = () => updateFormStatus(form.id, 'arquivado_aprovado');
+                    document.getElementById(`btn-arq-reprov-${form.id}`).onclick = () => updateFormStatus(form.id, 'arquivado_reprovado');
+                    document.getElementById(`btn-trash-${form.id}`).onclick = () => updateFormStatus(form.id, 'lixeira');
                 }
             });
         }
@@ -653,15 +804,21 @@
         function updateFormStatus(id, novoStatus) {
             const msgInput = document.getElementById(`admin-msg-${id}`).value.trim();
             
-            // Remove do objeto temporário de edição se ele estiver lá
             if (editingForms[id]) {
                 delete editingForms[id];
             }
 
-            set(ref(db, `formulariosPatentes/${id}/status`), novoStatus);
-            set(ref(db, `formulariosPatentes/${id}/mensagemDono`), msgInput).then(() => {
-                renderAdminPanel();
-            });
+            set(ref(db, `formulariosPatentesv2/${id}/status`), novoStatus);
+            set(ref(db, `formulariosPatentesv2/${id}/mensagemDono`), msgInput);
+            
+            if (novoStatus === 'lixeira') {
+                set(ref(db, `formulariosPatentesv2/${id}/timestampDelecao`), Date.now());
+            } else {
+                set(ref(db, `formulariosPatentesv2/${id}/timestampDelecao`), null);
+            }
+
+            // Força remontagem da interface atualizada
+            setTimeout(() => { renderAdminPanel(); }, 150);
         }
 
         window.switchTab = function(aba) {
@@ -674,6 +831,7 @@
             } else {
                 document.getElementById('tab-status').classList.add('active');
                 document.getElementById('section-status').classList.add('active');
+                searchUserForms();
             }
         }
 
