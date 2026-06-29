@@ -55,7 +55,7 @@
             right: 15px;
             background: transparent;
             border: none;
-            color: rgba(156, 163, 175, 0.15); /* Quase invisível */
+            color: rgba(156, 163, 175, 0.15);
             font-size: 1.3rem;
             cursor: pointer;
             transition: color 0.3s;
@@ -63,10 +63,10 @@
         }
 
         .btn-admin:hover {
-            color: rgba(16, 185, 129, 0.5); /* Acende levemente ao passar por cima */
+            color: rgba(16, 185, 129, 0.5);
         }
 
-        /* Abas de Navegação (Fazer / Consultar) */
+        /* Abas de Navegação */
         .nav-tabs {
             display: flex;
             gap: 10px;
@@ -93,7 +93,7 @@
             background: rgba(16, 185, 129, 0.05);
         }
 
-        /* Container Principal do Conteúdo */
+        /* Container Principal */
         .main-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -112,7 +112,7 @@
             display: block;
         }
 
-        /* Elementos de Formulário */
+        /* Formulários */
         .form-group {
             margin-bottom: 20px;
         }
@@ -158,7 +158,7 @@
             box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
         }
 
-        /* Estilização dos Encomendas/Status Encontrados */
+        /* Listagem / Status */
         .status-box {
             background: var(--bg-color);
             border: 1px solid var(--border-color);
@@ -219,13 +219,14 @@
             font-size: 1.5rem; cursor: pointer;
         }
 
-        /* Cards de gerenciamento de formulários na visão do Dono */
+        /* Cards Administrador */
         .admin-form-card {
             background: var(--bg-color);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
+            position: relative;
         }
 
         .action-btns {
@@ -244,6 +245,40 @@
             color: #000;
         }
 
+        .btn-delete-record {
+            background: transparent;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px;
+            opacity: 0.6;
+            transition: 0.2s;
+        }
+
+        .btn-delete-record:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .btn-clear-all {
+            width: 100%;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px dashed var(--danger-color);
+            color: var(--danger-color);
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.2s;
+        }
+
+        .btn-clear-all:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
         .info-search-box {
             background: rgba(16, 185, 129, 0.05);
             border: 1px dashed var(--accent-color);
@@ -258,7 +293,6 @@
 </head>
 <body>
 
-    <!-- Escudo Oculto Admin -->
     <button class="btn-admin" onclick="openAdminModal()">🛡️</button>
 
     <header>
@@ -277,6 +311,12 @@
             <div class="form-group">
                 <label>Nome Completo</label>
                 <input type="text" id="user-fullname" placeholder="Digite seu nome completo...">
+            </div>
+
+            <!-- OPÇÃO COMPLEMENTAR DO WHATSAPP -->
+            <div class="form-group">
+                <label>Identifique-se no WhatsApp</label>
+                <input type="text" id="user-whatsapp" placeholder="Número com DDD ou link do seu perfil...">
             </div>
 
             <div class="form-group">
@@ -342,10 +382,12 @@
             <!-- Painel de Gerenciamento Realtime -->
             <div id="admin-panel-box" style="display: none;">
                 <h3 style="margin-bottom: 5px;">Painel de Análise (lucaslcloux12)</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">Analise os requerimentos globais abaixo em tempo real.</p>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Analise os requerimentos globais abaixo em tempo real.</p>
                 
+                <button class="btn-clear-all" onclick="clearAllHistory()">⚠️ Limpar Todo o Histórico de Formulários</button>
+
                 <div id="admin-requests-container">
-                    <p style="color: var(--text-muted); text-align: center;">Nenhuma solicitação encontrada no momento.</p>
+                    <p style="text-align: center; color: var(--text-muted);">Nenhuma solicitação encontrada no momento.</p>
                 </div>
 
                 <button class="btn-submit" style="background: #ef4444; color: white; margin-top: 15px;" onclick="handleAdminLogout()">Desconectar</button>
@@ -356,9 +398,8 @@
     <!-- Conectores Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, set, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // MESMA API FORNECIDA
         const firebaseConfig = {
             apiKey: "AIzaSyAfG1gFI4SoEdttmhwORZt92_9bgqJcsgw",
             authDomain: "call-9cc3b.firebaseapp.com",
@@ -373,7 +414,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Estrutura de patentes (Sem os Assobiadores)
         const patentesGrupos = {
             "ᏆᎷᏢᎬРАᎠϴᎡᎬՏ": [
                 "𝕀𝕞𝕡erad𝕠𝕣 𝕊𝕦𝕡𝕣𝕖𝕞𝕠", "𝕀𝕞𝕡erad𝕠𝕣 𝕕𝕠𝕤 𝕀𝕞𝕡erad𝕠res", "𝕀𝕞𝕡erad𝕠𝕣 𝔸𝕤𝕤𝕠𝕓𝕚𝕒𝕕𝕠𝕣", "𝕀𝕞𝕡erad𝕠𝕣 ℙ𝕝𝕦𝕤", "𝕀𝕞𝕡erad𝕠𝕣"
@@ -382,25 +422,29 @@
                 "ᑭᖇᗴՏIᗪᗴᑎTᗴ ᗪO ᑕOᑎՏᗴᒪᕼO", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᗰᗴՏTᖇᗴ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᑭᒪᑌՏ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO"
             ],
             "ᎷϴΝᎪᎡᏟᎪՏ": [
-                "爪ㄖ几卂尺匚卂 卂乃丂ㄖㄥㄩㄒㄖ", "爪ㄖ几卂尺匚卂 卂丂丂ㄖ乃丨卂ᗪㄖ尺", "爪ㄖ几卂尺匚卂 爪乇丂ㄒ🇷🇪", "爪ㄖ几卂尺匚卂 ᐯ︎丨🇵", "爪ㄖ几卂尺匚卂"
+                "爪ㄖ几卂尺匚卂 卂乃丂ㄥㄩㄒㄖ", "爪ㄖ几卂尺匚卂 卂丂丂ㄖ乃丨卂ᗪㄖ尺", "爪ㄖ几卂尺匚卂 爪乇丂ㄒ🇷🇪", "爪ㄖ几卂尺匚卂 ᐯ︎丨🇵", "爪ㄖ几卂尺匚卂"
             ],
             "ΝϴᏴᎡᎬᏃᎪ": [
-                "მააიႦIძიჁ ႶიႦჁჹ", "მააიႦiძიჁ ოႮსႵiოiსiიႶმ́Ⴡiი", "მააიႦiძიჁ ჁiႺი"
+                "მააიႦIძიჁ ႶიႦჁჹ", "მააიႦiძიჁ ოႮსႵiოiσiიႶმ́Ⴡiი", "მააიႦiძიჁ ჁiႺი"
             ]
         };
 
         let dbFormularios = {};
 
-        // Sincroniza em tempo real com o nó 'formulariosPatentes'
         const formsRef = ref(db, 'formulariosPatentes');
         onValue(formsRef, (snapshot) => {
             dbFormularios = snapshot.val() || {};
+            
+            const buscaAtiva = document.getElementById('search-fullname').value.trim();
+            if(buscaAtiva && document.getElementById('section-status').classList.contains('active')) {
+                searchUserForms();
+            }
+
             if(document.getElementById('admin-panel-box').style.display === 'block') {
                 renderAdminPanel();
             }
         });
 
-        // Altera as opções do select de patentes dinamicamente baseado no grupo escolhido
         window.updatePatentOptions = function() {
             const grupo = document.getElementById('patent-group').value;
             const targetSelect = document.getElementById('patent-target');
@@ -421,14 +465,14 @@
             });
         }
 
-        // Enviar o formulário para o Firebase
         window.submitFormulary = function() {
             const nome = document.getElementById('user-fullname').value.trim();
+            const whatsapp = document.getElementById('user-whatsapp').value.trim();
             const grupo = document.getElementById('patent-group').value;
             const patente = document.getElementById('patent-target').value;
             const justificativa = document.getElementById('user-reason').value.trim();
 
-            if (!nome || !grupo || !patente || !justificativa) {
+            if (!nome || !whatsapp || !grupo || !patente || !justificativa) {
                 alert("Preencha todos os campos obrigatórios!");
                 return;
             }
@@ -438,30 +482,29 @@
                 id: novoFormRef.key,
                 nomeCompleto: nome,
                 nomePesquisa: nome.toLowerCase(),
+                whatsapp: whatsapp,
                 grupo: grupo.replace("Rules_", ""),
                 patente: patente,
                 justificativa: justificativa,
-                status: "pendente", // pendente, aprovado, reprovado
+                status: "pendente",
                 mensagemDono: "",
                 dataEnvio: new Date().toLocaleDateString('pt-BR')
             };
 
             set(novoFormRef, formData).then(() => {
-                alert("Formulário enviado com sucesso para lucaslcloux12@gmail.com!");
-                // Reseta campos
+                alert("Formulário enviado com sucesso!");
                 document.getElementById('user-fullname').value = '';
+                document.getElementById('user-whatsapp').value = '';
                 document.getElementById('patent-group').value = '';
                 document.getElementById('user-reason').value = '';
                 updatePatentOptions();
                 
-                // Salva o nome na caixa de pesquisa pra facilitar a vida do usuário
                 document.getElementById('search-fullname').value = nome;
                 switchTab('status');
                 searchUserForms();
             });
         }
 
-        // Buscar formulários de um usuário específico
         window.searchUserForms = function() {
             const nomeBusca = document.getElementById('search-fullname').value.trim().toLowerCase();
             const resultsContainer = document.getElementById('search-results');
@@ -480,7 +523,7 @@
             }
 
             if(achados.length === 0) {
-                resultsContainer.innerHTML = '<p style="color: var(--text-muted); text-align:center;">Nenhum formulário encontrado para este nome.</p>';
+                resultsContainer.innerHTML = '<p style="color: var(--text-muted); text-align:center;">Nenhum formulário ativo encontrado para este nome.</p>';
                 return;
             }
 
@@ -491,7 +534,7 @@
                 box.className = 'status-box';
                 box.innerHTML = `
                     <div class="status-header">
-                        <span style="font-weight:bold; color:#white;">${form.patente}</span>
+                        <span style="font-weight:bold; color:white;">${form.patente}</span>
                         <span class="badge ${form.status}">${form.status.toUpperCase()}</span>
                     </div>
                     <p style="font-size:0.85rem; color: var(--text-muted); margin-bottom: 8px;">Grupo: ${form.grupo} • Enviado em: ${form.dataEnvio}</p>
@@ -503,18 +546,16 @@
             });
         }
 
-        // Renderiza as solicitações no Painel Admin do Dono
         function renderAdminPanel() {
             const container = document.getElementById('admin-requests-container');
             container.innerHTML = '';
 
             let chaves = Object.keys(dbFormularios);
             if(chaves.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nenhum formulário no banco.</p>';
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">Nenhum formulário registrado no histórico.</p>';
                 return;
             }
 
-            // Ordena os pendentes primeiro
             chaves.sort((a,b) => (dbFormularios[a].status === 'pendente' ? -1 : 1));
 
             chaves.forEach(id => {
@@ -522,17 +563,21 @@
                 let card = document.createElement('div');
                 card.className = 'admin-form-card';
                 card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom:5px;">
                         <strong style="color: var(--accent-color); font-size:1.1rem;">${form.nomeCompleto}</strong>
-                        <span class="badge ${form.status}">${form.status.toUpperCase()}</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="badge ${form.status}">${form.status.toUpperCase()}</span>
+                            <button class="btn-delete-record" id="btn-del-${form.id}" title="Apagar este registro permanentemente">🗑️</button>
+                        </div>
                     </div>
+                    <p style="font-size:0.85rem; color:#25d366; font-weight: 500; margin-bottom: 4px;">🟢 WhatsApp: ${form.whatsapp || 'Não informado'}</p>
                     <p style="font-size:0.85rem; color:var(--text-muted);">Solicitou: <strong>${form.patente}</strong> (${form.grupo}) em ${form.dataEnvio}</p>
                     <p style="font-size:0.9rem; background:#111; padding:10px; margin:8px 0; border-radius:4px; border-left:3px solid var(--border-color);">
                         "${form.justificativa}"
                     </p>
                     <div class="form-group" style="margin-bottom: 5px;">
-                        <label style="font-size:0.8rem; color: var(--text-muted)">Responder Usuário (Mensagem extra):</label>
-                        <input type="text" id="admin-msg-${form.id}" value="${form.mensagemDono || ''}" placeholder="Ex: Parabéns! Entre no grupo secundário..." style="padding:6px; font-size:0.85rem;">
+                        <label style="font-size:0.8rem; color: var(--text-muted)">Responder Usuário:</label>
+                        <input type="text" id="admin-msg-${form.id}" value="${form.mensagemDono || ''}" placeholder="Ex: Parabéns!..." style="padding:6px; font-size:0.85rem;">
                     </div>
                     <div class="action-btns">
                         <button class="btn-action" style="background: var(--accent-color);" id="btn-aprove-${form.id}">Aprovar</button>
@@ -541,9 +586,9 @@
                 `;
                 container.appendChild(card);
 
-                // Vincula os eventos aos botões em tempo real
                 document.getElementById(`btn-aprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'aprovado');
                 document.getElementById(`btn-reprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'reprovado');
+                document.getElementById(`btn-del-${form.id}`).onclick = () => deleteIndividualRecord(form.id, form.nomeCompleto);
             });
         }
 
@@ -553,7 +598,22 @@
             set(ref(db, `formulariosPatentes/${id}/mensagemDono`), msgInput);
         }
 
-        // Sistema de abas da interface do usuário
+        function deleteIndividualRecord(id, nome) {
+            if (confirm(`Tem certeza que deseja apagar o formulário de "${nome}" do histórico permanentemente?`)) {
+                remove(ref(db, `formulariosPatentes/${id}`)).then(() => {
+                    alert("Registro deletado com sucesso!");
+                });
+            }
+        }
+
+        window.clearAllHistory = function() {
+            if (confirm("⚠️ ATENÇÃO MÁXIMA!\n\nVocê tem certeza absoluta que deseja apagar TODO o histórico de formulários enviados do banco de dados?\nEsta ação não pode ser desfeita!")) {
+                remove(ref(db, 'formulariosPatentes')).then(() => {
+                    alert("Todo o histórico foi limpo permanentemente!");
+                });
+            }
+        }
+
         window.switchTab = function(aba) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
@@ -567,7 +627,6 @@
             }
         }
 
-        // Controles das Modais Admin
         window.openAdminModal = function() {
             document.getElementById('admin-modal').style.display = 'flex';
         }
@@ -599,4 +658,3 @@
     </script>
 </body>
 </html>
-
