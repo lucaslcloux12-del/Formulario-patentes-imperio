@@ -48,8 +48,9 @@
             margin-bottom: 10px;
         }
 
-        /* Botão ADMIN Escudo Oculto */
+        /* Botão ADMIN Escudo Oculto por Padrão */
         .btn-admin {
+            display: none; /* Inicia oculto e só aparece via JS se for lucaslcloux12@gmail.com */
             position: fixed;
             top: 15px;
             right: 15px;
@@ -386,7 +387,7 @@
 </head>
 <body>
 
-    <button class="btn-admin" onclick="openAdminModal()">🛡️</button>
+    <button class="btn-admin" id="admin-shield" onclick="openAdminModal()">🛡️</button>
 
     <header>
         <h1>Requerimento de Patentes</h1>
@@ -396,7 +397,7 @@
     <div id="login-screen">
         <p style="color: var(--text-muted);">Para manter seus formulários privados e salvos em tempo real, faça login com a sua conta Google.</p>
         <button class="btn-google" onclick="loginGoogle()">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_\"Google_Logo\"_Cloud.svg" alt="G" style="width:18px;height:18px;background:none;border:none;"> Conectar com o Google
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22Google_Logo%22_Cloud.svg" alt="G" style="width:18px;height:18px;background:none;border:none;"> Conectar com o Google
         </button>
     </div>
 
@@ -521,7 +522,7 @@
                 "mathbb{I}mperad𝕠𝕣 𝕊𝕦𝕡𝕣𝕖𝕞𝕠", "mathbb{I}mperad𝕠𝕣 𝕕𝕠𝕤 mathbb{I}mperad𝕠res", "mathbb{I}mperad𝕠𝕣 𝔸𝕤𝕤𝕠𝕓𝕚𝕒𝕕𝕠𝕣", "mathbb{I}mperad𝕠𝕣 ℙ𝕝𝕦𝕤", "mathbb{I}mperad𝕠𝕣"
             ],
             "Rules_ᏟϴΝՏᎬᏞᎻϴ": [
-                "ᑭᖇᗴՏIᗪᗴᑎTᗴ ᗪO ᑕOᑎՏᗴᒪᕼO", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᗰᗴՏTᖇᗴ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᑭᒪᑌՏ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO"
+                "ᑭᖇᗴՏIᗪᗴᑎTᗴ ᗪO ᑕOᑎՏᗴᒪᕼO", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᗰᗴՏTᖇᗴ", "ᑕOᑎՏᗴᒪᕼᗴIᖇO ᑭᒪ𝑆", "ᑕOᑎՏᗴᒪᕼᗴIᖇO"
             ],
             "ᎷϴΝᎪᎡ匚卂Տ": [
                 "爪ㄖ几卂尺匚卂 卂乃丂ㄥㄩㄒㄖ", "爪ㄖ几卂尺匚卂 卂丂丂ㄖ乃丨卂ᗪㄖ尺", "爪ㄖ几卂尺匚卂 爪乇丂ㄒ🇷🇪", "爪ㄖ几卂尺匚卂 ᐯ︎丨🇵", "爪ㄖ几卂尺匚卂"
@@ -548,18 +549,26 @@
         };
 
         onAuthStateChanged(auth, (user) => {
+            const shield = document.getElementById('admin-shield');
             if (user) {
                 currentUser = user;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('protected-interface').style.display = 'block';
                 document.getElementById('logged-email').innerText = user.email;
                 
-                // Conecta o Realtime Database após o login
+                // O ESCUDO SÓ SURGE NA TELA CASO O E-MAIL SEJA O DO DONO Lucas
+                if (user.email === "lucaslcloux12@gmail.com") {
+                    shield.style.display = 'block';
+                } else {
+                    shield.style.display = 'none';
+                }
+                
                 conectarBancoDados();
             } else {
                 currentUser = null;
                 document.getElementById('login-screen').style.display = 'block';
                 document.getElementById('protected-interface').style.display = 'none';
+                shield.style.display = 'none';
             }
         });
 
@@ -568,7 +577,6 @@
             onValue(formsRef, (snapshot) => {
                 dbFormularios = snapshot.val() || {};
                 
-                // Executa a varredura da lixeira (Deleção em 24h) de forma automática
                 verificarLixeiraExclusoes();
 
                 if (document.getElementById('protected-interface').style.display === 'block') {
@@ -581,7 +589,6 @@
             });
         }
 
-        // Função interna para limpar dados expirados da lixeira (24 horas)
         function verificarLixeiraExclusoes() {
             const agora = Date.now();
             const vinteEQuatroHorasMs = 24 * 60 * 60 * 1000;
@@ -638,7 +645,7 @@
                 grupo: grupo.replace("Rules_", ""),
                 patente: patente,
                 justificativa: justificativa,
-                status: "pendente", // pendente, aprovado, reprovado, arquivado_aprovado, arquivado_reprovado, lixeira
+                status: "pendente", 
                 mensagemDono: "",
                 timestampDelecao: null,
                 dataEnvio: new Date().toLocaleDateString('pt-BR')
@@ -655,7 +662,6 @@
             });
         }
 
-        // Busca de formulários baseada estritamente no Login Google Ativo (Segurança Total)
         window.searchUserForms = function() {
             const resultsContainer = document.getElementById('search-results');
             resultsContainer.innerHTML = '';
@@ -742,7 +748,6 @@
                 
                 let botoesAcaoHtml = '';
 
-                // Interface Dinâmica de Edição/Ações dependendo de qual aba o Admin Lucas está visualizando
                 if (currentAdminFilter === 'pendente' || editingForms[id]) {
                     botoesAcaoHtml = `
                         <div class="form-group" style="margin-bottom: 5px;">
@@ -817,7 +822,6 @@
                 set(ref(db, `formulariosPatentesv2/${id}/timestampDelecao`), null);
             }
 
-            // Força remontagem da interface atualizada
             setTimeout(() => { renderAdminPanel(); }, 150);
         }
 
