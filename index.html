@@ -219,6 +219,36 @@
             font-size: 1.5rem; cursor: pointer;
         }
 
+        /* Sub-abas exclusivas do Painel Admin */
+        .admin-subtabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            background: var(--bg-color);
+            padding: 5px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .admin-subtab-btn {
+            flex: 1;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .admin-subtab-btn.active {
+            background: var(--card-bg);
+            color: #fff;
+            border: 1px solid var(--border-color);
+        }
+
         /* Cards Administrador */
         .admin-form-card {
             background: var(--bg-color);
@@ -243,40 +273,6 @@
             cursor: pointer;
             font-weight: bold;
             color: #000;
-        }
-
-        .btn-delete-record {
-            background: transparent;
-            border: none;
-            color: var(--danger-color);
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 4px;
-            opacity: 0.6;
-            transition: 0.2s;
-        }
-
-        .btn-delete-record:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .btn-clear-all {
-            width: 100%;
-            padding: 10px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px dashed var(--danger-color);
-            color: var(--danger-color);
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: 0.2s;
-        }
-
-        .btn-clear-all:hover {
-            background: var(--danger-color);
-            color: white;
         }
 
         .info-search-box {
@@ -349,7 +345,7 @@
             <div class="form-group">
                 <label>Consultar por Nome Completo</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="search-fullname" placeholder="Exatamente igual ao enviado...">
+                    <input type="text" id="search-fullname" placeholder="Exadamente igual ao enviado...">
                     <button class="btn-submit" style="width: auto; padding: 0 20px;" onclick="searchUserForms()">Buscar</button>
                 </div>
             </div>
@@ -380,13 +376,17 @@
 
             <!-- Painel de Gerenciamento Realtime -->
             <div id="admin-panel-box" style="display: none;">
-                <h3 style="margin-bottom: 5px;">Painel de Pedidos Pendentes (lucaslcloux12)</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Os itens somem daqui assim que você os responde/avalia.</p>
+                <h3 style="margin-bottom: 10px;">Painel de Controle (lucaslcloux12)</h3>
                 
-                <button class="btn-clear-all" onclick="clearAllHistory()">🧹 Limpar Histórico de Avaliados (Não apaga do usuário)</button>
+                <!-- Sub-Abas internas do Admin para separar o fluxo -->
+                <div class="admin-subtabs">
+                    <button class="admin-subtab-btn active" id="subtab-pendentes" onclick="switchAdminSubtab('pendente')">Pendentes ⏳</button>
+                    <button class="admin-subtab-btn" id="subtab-aprovados" onclick="switchAdminSubtab('aprovado')">Aprovados ✅</button>
+                    <button class="admin-subtab-btn" id="subtab-reprovados" onclick="switchAdminSubtab('reprovado')">Reprovados ❌</button>
+                </div>
 
                 <div id="admin-requests-container">
-                    <p style="text-align: center; color: var(--text-muted);">Nenhum pedido pendente pendente de resposta.</p>
+                    <p style="text-align: center; color: var(--text-muted);">Carregando requerimentos...</p>
                 </div>
 
                 <button class="btn-submit" style="background: #ef4444; color: white; margin-top: 15px;" onclick="handleAdminLogout()">Desconectar</button>
@@ -429,6 +429,7 @@
         };
 
         let dbFormularios = {};
+        let currentAdminFilter = 'pendente'; // Controla qual aba interna está ativa no admin
 
         const formsRef = ref(db, 'formulariosPatentes');
         onValue(formsRef, (snapshot) => {
@@ -486,7 +487,6 @@
                 patente: patente,
                 justificativa: justificativa,
                 status: "pendente",
-                vistoPeloAdmin: false, // Controla se aparece no seu menu
                 mensagemDono: "",
                 dataEnvio: new Date().toLocaleDateString('pt-BR')
             };
@@ -546,89 +546,86 @@
             });
         }
 
+        window.switchAdminSubtab = function(filtro) {
+            currentAdminFilter = filtro;
+            document.querySelectorAll('.admin-subtab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (filtro === 'pendente') document.getElementById('subtab-pendentes').classList.add('active');
+            if (filtro === 'aprovado') document.getElementById('subtab-aprovados').classList.add('active');
+            if (filtro === 'reprovado') document.getElementById('subtab-reprovados').classList.add('active');
+            
+            renderAdminPanel();
+        }
+
         function renderAdminPanel() {
             const container = document.getElementById('admin-requests-container');
             container.innerHTML = '';
 
             let chaves = Object.keys(dbFormularios);
-            // Filtra para exibir apenas os que NÃO foram avaliados/vistos por você ainda
-            let pendentesAdmin = chaves.filter(id => !dbFormularios[id].vistoPeloAdmin);
+            // Filtra com base na sub-aba em que você clicou no admin
+            let filtrados = chaves.filter(id => dbFormularios[id].status === currentAdminFilter);
 
-            if(pendentesAdmin.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">Nenhum formulário pendente de avaliação!</p>';
+            if(filtrados.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px 0;">Nenhum item nesta pasta (${currentAdminFilter.toUpperCase()}).</p>`;
                 return;
             }
 
-            pendentesAdmin.forEach(id => {
+            filtrados.forEach(id => {
                 const form = dbFormularios[id];
                 let card = document.createElement('div');
                 card.className = 'admin-form-card';
+                
+                // Define se os botões de ação precisam aparecer (só aparecem na aba de pendentes)
+                let botoesAcaoHtml = '';
+                if (currentAdminFilter === 'pendente') {
+                    botoesAcaoHtml = `
+                        <div class="form-group" style="margin-bottom: 5px;">
+                            <label style="font-size:0.8rem; color: var(--text-muted)">Adicionar Mensagem de Retorno:</label>
+                            <input type="text" id="admin-msg-${form.id}" value="${form.mensagemDono || ''}" placeholder="Ex: Parabéns! Você cumpriu os requisitos..." style="padding:6px; font-size:0.85rem;">
+                        </div>
+                        <div class="action-btns">
+                            <button class="btn-action" style="background: var(--accent-color);" id="btn-aprove-${form.id}">Mover p/ Aprovados</button>
+                            <button class="btn-action" style="background: var(--danger-color); color: white;" id="btn-reprove-${form.id}">Mover p/ Reprovados</button>
+                        </div>
+                    `;
+                } else {
+                    // Caso já esteja avaliado, apenas mostra o que você respondeu fixado
+                    botoesAcaoHtml = `
+                        <div style="font-size:0.85rem; margin-top:8px; padding:8px; background: rgba(0,0,0,0.2); border-radius:4px; color: var(--text-muted);">
+                            <strong>Sua Resposta Enviada:</strong> <span style="color:#fff;">${form.mensagemDono || '(Sem mensagem adicional)'}</span>
+                        </div>
+                    `;
+                }
+
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom:5px;">
                         <strong style="color: var(--accent-color); font-size:1.1rem;">${form.nomeCompleto}</strong>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="badge ${form.status}">${form.status.toUpperCase()}</span>
-                            <button class="btn-delete-record" id="btn-del-${form.id}" title="Apagar completamente de todos os lugares">🗑️</button>
-                        </div>
+                        <span class="badge ${form.status}">${form.status.toUpperCase()}</span>
                     </div>
                     <p style="font-size:0.85rem; color:#25d366; font-weight: 500; margin-bottom: 4px;">🟢 WhatsApp: ${form.whatsapp || 'Não informado'}</p>
                     <p style="font-size:0.85rem; color:var(--text-muted);">Solicitou: <strong>${form.patente}</strong> (${form.grupo}) em ${form.dataEnvio}</p>
                     <p style="font-size:0.9rem; background:#111; padding:10px; margin:8px 0; border-radius:4px; border-left:3px solid var(--border-color);">
                         "${form.justificativa}"
                     </p>
-                    <div class="form-group" style="margin-bottom: 5px;">
-                        <label style="font-size:0.8rem; color: var(--text-muted)">Responder Usuário e Ocultar do meu Menu:</label>
-                        <input type="text" id="admin-msg-${form.id}" value="${form.mensagemDono || ''}" placeholder="Ex: Parabéns!..." style="padding:6px; font-size:0.85rem;">
-                    </div>
-                    <div class="action-btns">
-                        <button class="btn-action" style="background: var(--accent-color);" id="btn-aprove-${form.id}">Aprovar</button>
-                        <button class="btn-action" style="background: var(--danger-color); color: white;" id="btn-reprove-${form.id}">Reprovar</button>
-                    </div>
+                    ${botoesAcaoHtml}
                 `;
                 container.appendChild(card);
 
-                document.getElementById(`btn-aprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'aprovado');
-                document.getElementById(`btn-reprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'reprovado');
-                document.getElementById(`btn-del-${form.id}`).onclick = () => deleteIndividualRecord(form.id, form.nomeCompleto);
+                // Executa os ganchos de eventos apenas se os elementos existirem na tela (aba pendente)
+                if (currentAdminFilter === 'pendente') {
+                    document.getElementById(`btn-aprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'aprovado');
+                    document.getElementById(`btn-reprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'reprovado');
+                }
             });
         }
 
         function updateFormStatus(id, novoStatus) {
             const msgInput = document.getElementById(`admin-msg-${id}`).value.trim();
             set(ref(db, `formulariosPatentes/${id}/status`), novoStatus);
-            set(ref(db, `formulariosPatentes/${id}/mensagemDono`), msgInput);
-            // Faz sumir do painel do Lucas, mas mantém no banco para a consulta do usuário comum
-            set(ref(db, `formulariosPatentes/${id}/vistoPeloAdmin`), true).then(() => {
+            set(ref(db, `formulariosPatentes/${id}/mensagemDono`), msgInput).then(() => {
+                // Atualiza a tela imediatamente movendo o item de aba
                 renderAdminPanel();
             });
-        }
-
-        function deleteIndividualRecord(id, nome) {
-            if (confirm(`Tem certeza que quer deletar o formulário de "${nome}" DE VEZ? Ele vai sumir tanto para você quanto para a consulta do usuário.`)) {
-                remove(ref(db, `formulariosPatentes/${id}`)).then(() => {
-                    alert("Registro deletado globalmente!");
-                });
-            }
-        }
-
-        window.clearAllHistory = function() {
-            if (confirm("Deseja limpar do banco de dados apenas os formulários que você já respondeu e avaliou? (Isso NÃO afeta o que os usuários veem)")) {
-                let chaves = Object.keys(dbFormularios);
-                let avaliados = chaves.filter(id => dbFormularios[id].vistoPeloAdmin);
-                
-                if(avaliados.length === 0) {
-                    alert("Não há registros arquivados para limpar.");
-                    return;
-                }
-
-                avaliados.forEach(id => {
-                    // Se quiser que o cara continue consultando para sempre, você não limpa o banco. 
-                    // Como você pediu para sumir SÓ do seu menu, mudei a função para marcar como 'arquivado definitivo' no seu painel sem apagar o histórico do cara.
-                    set(ref(db, `formulariosPatentes/${id}/vistoPeloAdmin`), true);
-                });
-                alert("Painel sincronizado e limpo com sucesso!");
-                renderAdminPanel();
-            }
         }
 
         window.switchTab = function(aba) {
@@ -659,7 +656,8 @@
             if (email === "lucaslcloux12@gmail.com" && pass === "lu01201201") {
                 document.getElementById('admin-login-box').style.display = 'none';
                 document.getElementById('admin-panel-box').style.display = 'block';
-                renderAdminPanel();
+                // Reseta para abrir sempre na aba de pendentes ao logar
+                switchAdminSubtab('pendente');
             } else {
                 alert("Acesso Negado! Chave ou e-mail inválido.");
             }
