@@ -275,6 +275,26 @@
             color: #000;
         }
 
+        .btn-edit-evaluation {
+            background: #243249;
+            color: #fff;
+            border: 1px solid #3b4f70;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: 0.2s;
+        }
+
+        .btn-edit-evaluation:hover {
+            background: #2d3f5d;
+            border-color: var(--accent-color);
+        }
+
         .info-search-box {
             background: rgba(16, 185, 129, 0.05);
             border: 1px dashed var(--accent-color);
@@ -319,7 +339,7 @@
                 <select id="patent-group" onchange="updatePatentOptions()">
                     <option value="">Selecione um grupo...</option>
                     <option value="ᏆᎷᏢᎬРАᎠϴᎡᎬՏ">ᏆᎷᏢᎬРАᎠϴᎡᎬՏ</option>
-                    <option value="Rules_ᏟϴΝՏᎬᏞᎻϴ">ᏟϴΝՏᎬᏞᎻϴ</option>
+                    <option value="Rules_ᏟϴΝՏᎬLHϴ">ᏟϴΝՏᎬᏞᎻϴ</option>
                     <option value="ᎷϴΝᎪᎡ匚卂Տ">ᎷϴΝᎪᎡᏟ开Տ</option>
                     <option value="ΝϴᏴᎡᎬᏃᎪ">ΝϴᏴᎡᎬᏃᎪ</option>
                 </select>
@@ -429,7 +449,8 @@
         };
 
         let dbFormularios = {};
-        let currentAdminFilter = 'pendente'; // Controla qual aba interna está ativa no admin
+        let currentAdminFilter = 'pendente'; 
+        let editingForms = {}; // Rastreia quais formulários arquivados estão em modo de edição temporária
 
         const formsRef = ref(db, 'formulariosPatentes');
         onValue(formsRef, (snapshot) => {
@@ -557,12 +578,16 @@
             renderAdminPanel();
         }
 
+        window.toggleEditMode = function(id) {
+            editingForms[id] = true;
+            renderAdminPanel();
+        }
+
         function renderAdminPanel() {
             const container = document.getElementById('admin-requests-container');
             container.innerHTML = '';
 
             let chaves = Object.keys(dbFormularios);
-            // Filtra com base na sub-aba em que você clicou no admin
             let filtrados = chaves.filter(id => dbFormularios[id].status === currentAdminFilter);
 
             if(filtrados.length === 0) {
@@ -575,25 +600,28 @@
                 let card = document.createElement('div');
                 card.className = 'admin-form-card';
                 
-                // Define se os botões de ação precisam aparecer (só aparecem na aba de pendentes)
                 let botoesAcaoHtml = '';
-                if (currentAdminFilter === 'pendente') {
+
+                // Se for a aba pendente OU se o dono clicou para editar um arquivado
+                if (currentAdminFilter === 'pendente' || editingForms[id]) {
                     botoesAcaoHtml = `
                         <div class="form-group" style="margin-bottom: 5px;">
-                            <label style="font-size:0.8rem; color: var(--text-muted)">Adicionar Mensagem de Retorno:</label>
+                            <label style="font-size:0.8rem; color: var(--text-muted)">Adicionar/Alterar Mensagem de Retorno:</label>
                             <input type="text" id="admin-msg-${form.id}" value="${form.mensagemDono || ''}" placeholder="Ex: Parabéns! Você cumpriu os requisitos..." style="padding:6px; font-size:0.85rem;">
                         </div>
                         <div class="action-btns">
                             <button class="btn-action" style="background: var(--accent-color);" id="btn-aprove-${form.id}">Mover p/ Aprovados</button>
                             <button class="btn-action" style="background: var(--danger-color); color: white;" id="btn-reprove-${form.id}">Mover p/ Reprovados</button>
+                            ${editingForms[id] ? `<button class="btn-action" style="background: var(--warning-color); color: black;" id="btn-back-pendente-${form.id}">Voltar p/ Pendente</button>` : ''}
                         </div>
                     `;
                 } else {
-                    // Caso já esteja avaliado, apenas mostra o que você respondeu fixado
+                    // Caso esteja estático nas abas de Aprovados/Reprovados
                     botoesAcaoHtml = `
                         <div style="font-size:0.85rem; margin-top:8px; padding:8px; background: rgba(0,0,0,0.2); border-radius:4px; color: var(--text-muted);">
                             <strong>Sua Resposta Enviada:</strong> <span style="color:#fff;">${form.mensagemDono || '(Sem mensagem adicional)'}</span>
                         </div>
+                        <button class="btn-edit-evaluation" onclick="toggleEditMode('${form.id}')">✏️ Editar Avaliação</button>
                     `;
                 }
 
@@ -611,19 +639,27 @@
                 `;
                 container.appendChild(card);
 
-                // Executa os ganchos de eventos apenas se os elementos existirem na tela (aba pendente)
-                if (currentAdminFilter === 'pendente') {
+                // Executa os ganchos de cliques dinâmicos
+                if (currentAdminFilter === 'pendente' || editingForms[id]) {
                     document.getElementById(`btn-aprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'aprovado');
                     document.getElementById(`btn-reprove-${form.id}`).onclick = () => updateFormStatus(form.id, 'reprovado');
+                    if(editingForms[id]) {
+                        document.getElementById(`btn-back-pendente-${form.id}`).onclick = () => updateFormStatus(form.id, 'pendente');
+                    }
                 }
             });
         }
 
         function updateFormStatus(id, novoStatus) {
             const msgInput = document.getElementById(`admin-msg-${id}`).value.trim();
+            
+            // Remove do objeto temporário de edição se ele estiver lá
+            if (editingForms[id]) {
+                delete editingForms[id];
+            }
+
             set(ref(db, `formulariosPatentes/${id}/status`), novoStatus);
             set(ref(db, `formulariosPatentes/${id}/mensagemDono`), msgInput).then(() => {
-                // Atualiza a tela imediatamente movendo o item de aba
                 renderAdminPanel();
             });
         }
@@ -656,7 +692,6 @@
             if (email === "lucaslcloux12@gmail.com" && pass === "lu01201201") {
                 document.getElementById('admin-login-box').style.display = 'none';
                 document.getElementById('admin-panel-box').style.display = 'block';
-                // Reseta para abrir sempre na aba de pendentes ao logar
                 switchAdminSubtab('pendente');
             } else {
                 alert("Acesso Negado! Chave ou e-mail inválido.");
@@ -668,6 +703,7 @@
             document.getElementById('admin-panel-box').style.display = 'none';
             document.getElementById('admin-email').value = '';
             document.getElementById('admin-pass').value = '';
+            editingForms = {};
             closeAdminModal();
         }
     </script>
